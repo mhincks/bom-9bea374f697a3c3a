@@ -1,1 +1,107 @@
-<meta name=robots content=noindex>ok
+<!doctype html>
+<html lang="en" class="wa-cloak" data-webawesome="wa/">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="referrer" content="no-referrer">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BoM Study">
+<meta name="theme-color" content="#f7f4ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)">
+<title>BoM Study</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="wa/styles/webawesome.css">
+<link rel="stylesheet" href="app.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div id="gate" hidden>
+  <div class="gate-card">
+    <img src="icons/icon-192.png" alt="" width="72" height="72">
+    <h1>Book of Mormon Study</h1>
+    <p class="quiet">Private library. Enter your passphrase to unlock it on this device.</p>
+    <form id="gateForm">
+      <wa-input id="pass" type="password" label="Passphrase" password-toggle autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"></wa-input>
+      <wa-button id="unlockBtn" type="submit" variant="brand">Unlock</wa-button>
+      <div id="gateErr" class="err" hidden>That passphrase didn't work.</div>
+    </form>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <aside id="side">
+    <header class="bar" id="sideBar"><div class="bar-title" id="sideTitle">Library</div><div class="bar-actions" id="sideActions"></div></header>
+    <main id="pane" class="scroll"></main>
+    <nav id="tabs">
+      <button data-tab="lib"><wa-icon name="book-bible"></wa-icon><span>Library</span></button>
+      <button data-tab="search"><wa-icon name="magnifying-glass"></wa-icon><span>Search</span></button>
+      <button data-tab="notes"><wa-icon name="highlighter"></wa-icon><span>Notes</span></button>
+      <button data-tab="settings"><wa-icon name="gear"></wa-icon><span>Settings</span></button>
+    </nav>
+  </aside>
+  <section id="reader">
+    <header class="bar" id="readBar">
+      <wa-button id="backBtn" appearance="plain" size="s" class="narrow-only"><wa-icon name="chevron-left" label="Back"></wa-icon></wa-button>
+      <div class="bar-title" id="readTitle"></div>
+      <div class="bar-actions">
+        <wa-button id="typeBtn" appearance="plain" size="s"><wa-icon name="font" label="Text settings"></wa-icon></wa-button>
+        <wa-button id="saveBtn" appearance="plain" size="s"><wa-icon id="saveIcon" name="bookmark" variant="regular" label="Save offline"></wa-icon></wa-button>
+        <wa-button id="origBtn" appearance="plain" size="s" target="_blank" rel="noopener noreferrer"><wa-icon name="arrow-up-right-from-square" label="Open original"></wa-icon></wa-button>
+      </div>
+    </header>
+    <div id="docWrap" class="scroll"><article id="doc"></article></div>
+  </section>
+</div>
+
+<div id="selbar" hidden role="toolbar" aria-label="Highlight selection">
+  <button class="sw c-yellow" data-color="yellow" aria-label="Yellow highlight"></button>
+  <button class="sw c-green" data-color="green" aria-label="Green highlight"></button>
+  <button class="sw c-blue" data-color="blue" aria-label="Blue highlight"></button>
+  <button class="sw c-pink" data-color="pink" aria-label="Pink highlight"></button>
+  <span class="sep"></span>
+  <button class="tool" data-act="underline" aria-label="Underline"><wa-icon name="underline"></wa-icon></button>
+  <button class="tool" data-act="note" aria-label="Add note"><wa-icon name="note-sticky" variant="regular"></wa-icon></button>
+  <button class="tool" data-act="copy" aria-label="Copy"><wa-icon name="copy" variant="regular"></wa-icon></button>
+</div>
+
+<wa-dialog id="annDlg" label="Highlight">
+  <blockquote id="annQuote"></blockquote>
+  <div class="ann-colors" id="annColors">
+    <button class="sw c-yellow" data-color="yellow" aria-label="Yellow"></button>
+    <button class="sw c-green" data-color="green" aria-label="Green"></button>
+    <button class="sw c-blue" data-color="blue" aria-label="Blue"></button>
+    <button class="sw c-pink" data-color="pink" aria-label="Pink"></button>
+    <button class="sw c-none" data-color="none" aria-label="No color"></button>
+  </div>
+  <wa-switch id="annUnderline">Underline</wa-switch>
+  <wa-textarea id="annNote" label="Note" rows="4" resize="auto" placeholder="Add a note…"></wa-textarea>
+  <div slot="footer" class="dlg-foot">
+    <wa-button id="annDelete" variant="danger" appearance="outlined">Delete</wa-button>
+    <wa-button id="annDone" variant="brand">Done</wa-button>
+  </div>
+</wa-dialog>
+
+<wa-drawer id="typeDrawer" label="Text" placement="bottom">
+  <div class="type-panel">
+    <wa-slider id="fontSize" label="Text size" min="14" max="28" step="1"></wa-slider>
+    <wa-radio-group id="fontFam" label="Font" orientation="horizontal">
+      <wa-radio appearance="button" value="serif">Serif</wa-radio>
+      <wa-radio appearance="button" value="sans">Sans</wa-radio>
+    </wa-radio-group>
+    <wa-radio-group id="themeSel" label="Theme" orientation="horizontal">
+      <wa-radio appearance="button" value="auto">Auto</wa-radio>
+      <wa-radio appearance="button" value="light">Light</wa-radio>
+      <wa-radio appearance="button" value="sepia">Sepia</wa-radio>
+      <wa-radio appearance="button" value="dark">Dark</wa-radio>
+    </wa-radio-group>
+    <wa-slider id="lineH" label="Line spacing" min="1.3" max="2.1" step="0.1"></wa-slider>
+  </div>
+</wa-drawer>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+</body>
+</html>
