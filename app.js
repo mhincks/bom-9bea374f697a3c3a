@@ -65,7 +65,7 @@ async function start(){ if(started) return; started=true;
   $('#app').hidden=false;
   $('#pane').innerHTML='<div class="empty"><wa-spinner style="font-size:28px"></wa-spinner></div>';
   const c=await getEnc('catalog.bin');
-  S.books=c.books; S.srcNames=c.src; S.topics=c.topics;
+  S.books=c.books; S.sections=c.sections||[['',c.books.map(b=>b[0])]]; S.srcNames=c.src; S.topics=c.topics;
   S.cat=c.items.map((r,n)=>({n,id:r[0],src:r[1],title:r[2],author:r[3],year:r[4],books:r[5],ch:r[6],tg:r[7],sum:r[8],k:r[9],txt:r[10],ref:r[11],venue:r[12]}));
   S.cat.forEach(i=>S.byId.set(i.id,i));
   S.anns=(await annAll()).filter(a=>!a.deleted);
@@ -105,8 +105,9 @@ function drawLib(){
   if(!book){
     setBar('Library');
     const cnt=new Map(); items.forEach(i=>i.books.forEach(b=>cnt.set(b,(cnt.get(b)||0)+1)));
-    $('#pane').innerHTML=filterControls()+`<div class="sec-h">Books · ${items.length.toLocaleString()} items</div><div class="books">${
-      S.books.map(([c,n])=>`<div class="book" data-b="${c}"><span>${esc(n)}</span><small>${cnt.get(c)||0}</small></div>`).join('')}</div>`;
+    $('#pane').innerHTML=filterControls()+`<div class="sec-h">Books · ${items.length.toLocaleString()} items</div>`+S.sections.map(([h,codes])=>{
+      const bs=codes.map(c=>S.books.find(b=>b[0]===c)).filter(Boolean); const tot=items.filter(i=>i.books.some(b=>codes.includes(b))).length;
+      return (h?`<div class="sec-h">${esc(h)} · ${tot.toLocaleString()} items</div>`:'')+`<div class="books">${bs.map(([c,n])=>`<div class="book" data-b="${c}"><span>${esc(n)}</span><small>${cnt.get(c)||0}</small></div>`).join('')}</div>`; }).join('');
     $$('.book').forEach(el=>el.onclick=()=>go('#/lib/'+el.dataset.b));
     bindFilters(drawLib); $('#pane').scrollTop=S.libScroll||0; return;
   }
@@ -123,7 +124,7 @@ function drawLib(){
   $$('.chaps button').forEach(b=>b.onclick=()=>go('#/lib/'+book+(+b.dataset.c?'/'+b.dataset.c:''),true));
   bindFilters(drawLib); renderList($('#list'),list);
 }
-function srcBadge(s){ const v={knowhy:'brand',evidence:'success',bti:'warning',interpreter:'neutral'}[s]||'neutral'; return `<wa-badge variant="${v}" appearance="filled-outlined">${esc(S.srcNames[s]||s)}</wa-badge>`; }
+function srcBadge(s){ const v={knowhy:'brand',evidence:'success',bti:'warning',interpreter:'neutral',sba:'brand',rsc:'success',relEd:'success'}[s]||'neutral'; return `<wa-badge variant="${v}" appearance="filled-outlined">${esc(S.srcNames[s]||s)}</wa-badge>`; }
 function rowHTML(i,snip){ const n=S.annCount.get(i.id);
   return `<div class="row${S.doc&&S.doc.id===i.id?' active':''}" data-id="${esc(i.id)}"><h3>${esc(i.title)}</h3><div class="meta">${srcBadge(i.src)}<span>${esc(i.author)}${i.year?' · '+i.year:''}</span>${i.txt?'':'<wa-badge variant="neutral" appearance="outlined">link only</wa-badge>'}${n?`<span title="Notes">✎ ${n}</span>`:''}</div>${snip?`<p class="snip">${snip}</p>`:i.sum?`<p>${esc(i.sum)}</p>`:''}</div>`; }
 function renderList(el,list,snips){
@@ -172,7 +173,7 @@ function snippet(a,terms,phrases){ const txt=a.paras.length?a.paras.join(' '):a.
 function drawSearch(){
   setBar('Search');
   $('#pane').innerHTML=`<div class="searchbox"><wa-input id="q" type="search" placeholder="Search all article text" with-clear value="${esc(S.q)}" autocapitalize="off" enterkeyhint="search"><wa-icon slot="start" name="magnifying-glass"></wa-icon></wa-input>
-  <div class="filters"><wa-select id="fBook" size="s" placeholder="Any book" with-clear value="${esc(S.searchBook||'')}">${S.books.map(([c,n])=>`<wa-option value="${c}">${esc(n)}</wa-option>`).join('')}</wa-select>
+  <div class="filters"><wa-select id="fBook" size="s" placeholder="Any book" with-clear value="${esc(S.searchBook||'')}">${S.sections.map(([h,codes],k)=>(k?'<wa-divider></wa-divider>':'')+(h?`<small>${esc(h)}</small>`:'')+codes.map(c=>S.books.find(b=>b[0]===c)).filter(Boolean).map(([c,n])=>`<wa-option value="${c}">${esc(n)}</wa-option>`).join('')).join('')}</wa-select>
   <wa-select id="fSrc" size="s" placeholder="All sources" with-clear value="${esc(S.lib.src)}">${Object.entries(S.srcNames).map(([k,v])=>`<wa-option value="${k}">${esc(v)}</wa-option>`).join('')}</wa-select></div></div>
   <div id="sres"><div class="empty small">Searches the full text of ${S.cat.filter(i=>i.txt).length.toLocaleString()} articles plus titles, summaries and tags.<br>Use "quotes" for an exact phrase.</div></div>`;
   const qi=$('#q'); let t;
